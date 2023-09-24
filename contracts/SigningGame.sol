@@ -29,15 +29,36 @@ contract SigningGame {
 
         emit Joined(msg.sender);
 
-        if (currentPlayers == 4) {
-            gameStarted = true;
-            for (uint i = 0; i < 4; i++) {
-                balances[players[i]] -= GAME_CONTRIBUTION;
-                prizePool += GAME_CONTRIBUTION;
-            }
-            emit GameStarted();
-        }
     }
+
+function startNewRound() external {
+    require(!gameStarted, "The game is still ongoing");
+    require(
+        msg.sender == players[0] || 
+        msg.sender == players[1] || 
+        msg.sender == players[2] || 
+        msg.sender == players[3], 
+        "Only a player from the last game can initiate the new round"
+    );
+    
+    gameStarted = true;
+
+
+    for (uint i = 0; i < 2; i++) {
+        winners[i] = address(0);
+    }
+
+    // Collect GAME_CONTRIBUTION from each player for the new round
+    for (uint i = 0; i < 4; i++) {
+        require(balances[players[i]] >= GAME_CONTRIBUTION, "All players must have enough balance for the game contribution");
+        
+        balances[players[i]] -= GAME_CONTRIBUTION;
+        prizePool += GAME_CONTRIBUTION;
+    }
+    
+    emit GameStarted();
+}
+
 
     function sign() external {
         require(gameStarted, "Game hasn't started yet");
@@ -68,6 +89,8 @@ contract SigningGame {
         emit GameEnded(winners, distributions);
 
         // Reset the game state
+        signedPlayersCount = 0;
+        prizePool = 0; 
         gameStarted = false;
     }
 
