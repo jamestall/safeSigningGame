@@ -68,12 +68,7 @@ contract SigningGame {
         emit GameEnded(winners, distributions);
 
         // Reset the game state
-        delete players;
-        currentPlayers = 0;
         gameStarted = false;
-        prizePool = 0;
-        signedPlayersCount = 0;
-        delete winners;
     }
 
     function withdraw() external {
